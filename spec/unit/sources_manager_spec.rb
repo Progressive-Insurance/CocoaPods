@@ -178,6 +178,16 @@ module Pod
           ENV.delete('NETRC')
         end
 
+        it 'environment credentials' do
+          WebMock.stub_request(:get, 'https://some_host.com/something/CocoaPods-version.yml').
+            with(:basic_auth => %w[user1 xxx]).
+            to_return(:status => 200, :body => CDN_REPO_RESPONSE)
+
+          ENV['COCOAPODS_CDN_SOME_HOST__COM'] = "user1:xxx"
+          @sources_manager.cdn_url?('https://some_host.com/something').should == true
+          ENV.delete('COCOAPODS_CDN_SOME_HOST__COM')
+        end
+
         it 'fake 200 response' do
           # really broken (not compatible with YAML) html that may return any endpoint
           # i.e. login page after request redirect

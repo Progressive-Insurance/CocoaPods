@@ -79,8 +79,8 @@ module Pod
         uri = URI.parse(url)
         return false unless uri.userinfo.nil?
 
-        netrc_host = uri.host
-        credentials = netrc_info[netrc_host]
+        host = uri.host
+        credentials = netrc_info[host] || credentials_from_env(host)
         uri_options[:http_basic_authentication] = credentials if credentials
 
         response = OpenURI.open_uri(url.chomp('/') + '/CocoaPods-version.yml', uri_options)
@@ -90,6 +90,20 @@ module Pod
         return false
       rescue => e
         raise Informative, "Couldn't determine repo type for URL: `#{url}`: #{e}"
+      end
+
+      # Returns a username and password if set via environment variable.
+      # The variable syntax is `COCOAPODS_CDN_` appended with the 
+      # uppercased host, with all dots replaced with two underscores.
+      # E.g. for example.com, `COCOAPODS_CDN_EXAMPLE__COM` would be set.
+      #
+      #@return [Array] An array with two elements, a username and password.
+      #
+      # @param  [String] host
+      #                  The host for which to retrieve credentials.
+      #
+      def credentials_from_env(host)
+        ENV["COCOAPODS_CDN_#{host.upcase.gsub(".", "__")}"]&.split(":")
       end
 
       # Returns the source whose {Source#name} or {Source#url} is equal to the
