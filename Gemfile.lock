@@ -352,7 +352,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (> 5, < 7)
   awesome_print
-  bacon!
+  bacon (~> 1.1, >= 0)!
   bigdecimal (~> 3.0)
   bundler (~> 2.0)
   claide!
